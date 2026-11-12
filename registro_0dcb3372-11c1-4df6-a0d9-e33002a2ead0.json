@@ -1,0 +1,17 @@
+{
+    "nombre": "Cesar",
+    "apellido": "Romero",
+    "email": "zerocbr@gmail.com",
+    "token": "0dcb3372-11c1-4df6-a0d9-e33002a2ead0",
+    "fecha_utc": "2026-11-12T20:52:10.915369+00:00",
+    "sistema_operativo": "Linux",
+    "version_so": "6.18.58.1-microsoft-standard-WSL2",
+    "arquitectura": "x86_64",
+    "procesador": "",
+    "version_python": "3.12.16",
+    "hostname_contenedor": "c4a8746c949b",
+    "plataforma": "OpenFaaS",
+    "funcion": "registro-serverless",
+    "estado": "Ejecucion exitosa",
+    "firma_sha256": "50ee6286ff2713f3c908a07f9a72b3525d838d27782fbb6e1829454587744e1e"
+}
