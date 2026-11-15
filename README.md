@@ -1,5 +1,5 @@
 # Laboratorio Serverless — OpenFaaS + Python
-
+https://xrugamas.github.io/laboratorio-serverless/
 Laboratorio de **Introducción al Cómputo en la Nube** (Unidad 3: Computación Serverless y modelo FaaS).
 
 Función Serverless en Python (`python3-http` de OpenFaaS) que:
