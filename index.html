@@ -1,56 +1,259 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SharePoint File Picker Demo</title>
-    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.2.min.js"></script>
-    <script src="https://magresilencia365.sharepoint.com/_layouts/15/sp.runtime.js"></script>
-    <script src="https://magresilencia365.sharepoint.com/_layouts/15/sp.js"></script>
-    <script src="https://magresilencia365.sharepoint.com/_layouts/15/sp.ui.dialog.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Registro Serverless</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
+<style> 
+  :root {
+    color-scheme: light;
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --fg: #14202b;
+    --muted: #5b6b79;
+    --line: #f6f7f9;
+    --accent: #0b5cad;
+    --ok: #1a7f46;
+    --ok-bg: #e3f3e9;
+    --bad: #b42318;
+    --bad-bg: #fde8e6;
+    --code-bg: #eef1f5;
+    --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
+    --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --bg: #0e1620;
+      --surface: #151f2b;
+      --fg: #e6edf3;
+      --muted: #93a3b3;
+      --line: #263444;
+      --accent: #6cb2f5;
+      --ok: #55d08a;
+      --ok-bg: #12301f;
+      --bad: #ff8b80;
+      --bad-bg: #3a1a17;
+      --code-bg: #0b121a;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.5;
+    padding: 32px 16px 56px;
+  }
+  main { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+
+  header { display: flex; flex-direction: column; gap: 10px; }
+  .eyebrow { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+  h1 { font-family: var(--font-display); font-weight: 600; font-size: 30px; line-height: 1.15; margin: 0; text-wrap: balance; }
+  .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 500; background: var(--ok-bg); color: var(--ok); }
+  .pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .token { font-family: var(--font-mono); font-size: 13px; color: var(--muted); overflow-wrap: anywhere; min-width: 0; }
+
+  section { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 20px; min-width: 0; }
+  h2 { font-family: var(--font-display); font-weight: 500; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+  dl { margin: 0; display: grid; grid-template-columns: minmax(130px, 200px) minmax(0, 1fr); gap: 10px 20px; }
+  dt { color: var(--muted); }
+  dd { margin: 0; overflow-wrap: anywhere; }
+  .mono { font-family: var(--font-mono); font-size: 13.5px; }
+  .sub { color: var(--muted); font-size: 13px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+
+  .verify { display: flex; flex-direction: column; gap: 14px; }
+  .result { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 6px; font-weight: 600; background: var(--code-bg); color: var(--muted); }
+  .result.ok { background: var(--ok-bg); color: var(--ok); }
+  .result.bad { background: var(--bad-bg); color: var(--bad); }
+  .hashes { display: grid; grid-template-columns: minmax(90px, 130px) minmax(0, 1fr); gap: 6px 16px; align-items: start; }
+  .hashes dt { font-size: 13px; }
+  .hashes dd { font-family: var(--font-mono); font-size: 12.5px; word-break: break-all; }
+
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 12px; }
+  button { font: inherit; font-weight: 500; font-size: 14px; cursor: pointer; background: var(--accent); color: var(--bg); border: 0; border-radius: 6px; padding: 8px 16px; }
+  button:hover { filter: brightness(1.08); }
+  button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .note { color: var(--muted); font-size: 13px; }
+
+  pre { margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 6px; padding: 14px; overflow-x: auto; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.6; }
+  footer { color: var(--muted); font-size: 13px; }
+
+  @media (max-width: 520px) {
+    h1 { font-size: 25px; }
+    dl { grid-template-columns: 1fr; gap: 2px; }
+    dd { margin-bottom: 10px; }
+    .hashes { grid-template-columns: 1fr; }
+    .hashes dd { margin-bottom: 8px; }
+  }
+</style>
 </head>
 <body>
-    <h2>SharePoint File Picker Demo</h2>
-    <button id="openPickerButton">Select File from SharePoint</button>
+<main>
+  <header>
+    <span class="eyebrow">Unidad 3 · Computación serverless y modelo FaaS</span>
+    <h1>Registro de ejecución serverless</h1>
+    <div class="meta">
+      <span class="pill" id="estado"></span>
+      <span class="token" id="token"></span>
+    </div>
+  </header>
 
-    <script>
-        $(document).ready(function () {
-            $('#openPickerButton').click(function () {
-                openPicker();
-            });
-        });
+  <section>
+    <h2>Estudiante</h2>
+    <dl>
+      <dt>Nombre</dt><dd id="nombre"></dd>
+      <dt>Apellido</dt><dd id="apellido"></dd>
+      <dt>Correo del aula virtual</dt><dd id="email" class="mono"></dd>
+    </dl>
+  </section>
 
-        function openPicker() {
-            SP.SOD.executeFunc('sp.js', 'SP.ClientContext', function () {
-                SP.UI.ModalDialog.showModalDialog({
-                    url: '/_layouts/15/Picker.aspx?IsDlg=1',
-                    width: 800,
-                    height: 600,
-                    title: 'Select a file from SharePoint',
-                    dialogReturnValueCallback: function (result, value) {
-                        if (result === SP.UI.DialogResult.OK) {
-                            var fileId = value[0].id; // Get the selected file ID
-                            var fileName = value[0].fileName; // Get the selected file name
-                            console.log('Selected File ID:', fileId);
-                            console.log('Selected File Name:', fileName);
-                            alert('Selected File Name: ' + fileName);
-                        }
-                    }
-                });
-            });
-        }
-    </script>
+  <div class="grid">
+    <section>
+      <h2>Ejecución</h2>
+      <dl>
+        <dt>Plataforma</dt><dd id="plataforma"></dd>
+        <dt>Función</dt><dd id="funcion" class="mono"></dd>
+        <dt>Fecha UTC</dt><dd><span id="fecha" class="mono"></span><div class="sub" id="fecha-local"></div></dd>
+      </dl>
+    </section>
+    <section>
+      <h2>Entorno del contenedor</h2>
+      <dl>
+        <dt>Sistema operativo</dt><dd id="so"></dd>
+        <dt>Kernel</dt><dd id="kernel" class="mono"></dd>
+        <dt>Arquitectura</dt><dd id="arq" class="mono"></dd>
+        <dt>Python</dt><dd id="py" class="mono"></dd>
+        <dt>Hostname</dt><dd id="host" class="mono"></dd>
+      </dl>
+    </section>
+  </div>
+
+  <section class="verify">
+    <h2>Firma SHA-256</h2>
+    <div class="result" id="resultado">Verificando firma…</div>
+    <dl class="hashes">
+      <dt>Firma registrada</dt><dd id="firma-reg"></dd>
+      <dt>Firma calculada</dt><dd id="firma-calc"></dd>
+    </dl>
+    <p class="note" style="margin:0">La firma se calcula en el navegador sobre el registro sin el campo <span class="mono">firma_sha256</span>, con las claves ordenadas, igual que el script de verificación del laboratorio.</p>
+  </section>
+
+  <section>
+    <h2>Archivo JSON original</h2>
+    <div class="actions">
+      <button type="button" id="copiar">Copiar JSON</button>
+      <span class="note" id="copiado" role="status"></span>
+    </div>
+    <pre id="json"></pre>
+  </section>
+
+  <footer>Archivo de evidencia: <span class="mono">registro_0dcb3372-11c1-4df6-a0d9-e33002a2ead0.json</span></footer>
+</main>
+
+<script>
+  var registro = {
+    "nombre": "Cesar",
+    "apellido": "Romero",
+    "email": "zerocbr@gmail.com",
+    "token": "0dcb3372-11c1-4df6-a0d9-e33002a2ead0",
+    "fecha_utc": "2026-11-12T20:52:10.915369+00:00",
+    "sistema_operativo": "Linux",
+    "version_so": "6.18.58.1-microsoft-standard-WSL2",
+    "arquitectura": "x86_64",
+    "procesador": "",
+    "version_python": "3.12.16",
+    "hostname_contenedor": "c4a8746c949b",
+    "plataforma": "OpenFaaS",
+    "funcion": "registro-serverless",
+    "estado": "Ejecucion exitosa",
+    "firma_sha256": "50ee6286ff2713f3c908a07f9a72b3525d838d27782fbb6e1829454587744e1e"
+  };
+
+  function set(id, text) { document.getElementById(id).textContent = text; }
+
+  set("estado", registro.estado);
+  set("token", "Token " + registro.token);
+  set("nombre", registro.nombre);
+  set("apellido", registro.apellido);
+  set("email", registro.email);
+  set("plataforma", registro.plataforma);
+  set("funcion", registro.funcion);
+  set("fecha", registro.fecha_utc);
+  set("so", registro.sistema_operativo);
+  set("kernel", registro.version_so);
+  set("arq", registro.arquitectura);
+  set("py", registro.version_python);
+  set("host", registro.hostname_contenedor);
+  set("firma-reg", registro.firma_sha256);
+  set("json", JSON.stringify(registro, null, 4));
+
+  try {
+    var d = new Date(registro.fecha_utc.replace(/(\.\d{3})\d+/, "$1"));
+    var txt = new Intl.DateTimeFormat("es-GT", {
+      dateStyle: "long", timeStyle: "medium", timeZone: "America/Guatemala"
+    }).format(d);
+    set("fecha-local", txt + " (hora de Guatemala)");
+  } catch (e) {}
+
+  // Serializa igual que Python: json.dumps(sort_keys=True, ensure_ascii=False)
+  function pyDumps(obj) {
+    return "{" + Object.keys(obj).sort().map(function (k) {
+      return JSON.stringify(k) + ": " + JSON.stringify(obj[k]);
+    }).join(", ") + "}";
+  }
+
+  function verificar() {
+    var sinFirma = {};
+    Object.keys(registro).forEach(function (k) { if (k !== "firma_sha256") sinFirma[k] = registro[k]; });
+    var bytes = new TextEncoder().encode(pyDumps(sinFirma));
+    return crypto.subtle.digest("SHA-256", bytes).then(function (buf) {
+      return Array.prototype.map.call(new Uint8Array(buf), function (b) {
+        return ("0" + b.toString(16)).slice(-2);
+      }).join("");
+    });
+  }
+
+  var res = document.getElementById("resultado");
+  try {
+    verificar().then(function (hex) {
+      set("firma-calc", hex);
+      if (hex === registro.firma_sha256) {
+        res.className = "result ok";
+        res.textContent = "Firma válida: el contenido no fue modificado";
+      } else {
+        res.className = "result bad";
+        res.textContent = "La firma no coincide";
+      }
+    }).catch(function () {
+      res.textContent = "Este navegador no permite calcular la firma aquí";
+    });
+  } catch (e) {
+    res.textContent = "Este navegador no permite calcular la firma aquí";
+  }
+
+  function seleccionar() {
+    var r = document.createRange(); r.selectNodeContents(document.getElementById("json"));
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+    set("copiado", "Texto seleccionado, copia con Ctrl+C");
+  }
+
+  document.getElementById("copiar").addEventListener("click", function () {
+    var texto = JSON.stringify(registro, null, 4);
+    try {
+      navigator.clipboard.writeText(texto).then(function () {
+        set("copiado", "Copiado");
+      }).catch(seleccionar);
+    } catch (e) { seleccionar(); }
+  });
+</script>
 </body>
 </html>
-
