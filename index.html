@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SharePoint File Picker Demo</title>
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.2.min.js"></script>
+    <script src="https://magresilencia365.sharepoint.com/_layouts/15/sp.runtime.js"></script>
+    <script src="https://magresilencia365.sharepoint.com/_layouts/15/sp.js"></script>
+    <script src="https://magresilencia365.sharepoint.com/_layouts/15/sp.ui.dialog.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h2>SharePoint File Picker Demo</h2>
+    <button id="openPickerButton">Select File from SharePoint</button>
+
+    <script>
+        $(document).ready(function () {
+            $('#openPickerButton').click(function () {
+                openPicker();
+            });
+        });
+
+        function openPicker() {
+            SP.SOD.executeFunc('sp.js', 'SP.ClientContext', function () {
+                SP.UI.ModalDialog.showModalDialog({
+                    url: '/_layouts/15/Picker.aspx?IsDlg=1',
+                    width: 800,
+                    height: 600,
+                    title: 'Select a file from SharePoint',
+                    dialogReturnValueCallback: function (result, value) {
+                        if (result === SP.UI.DialogResult.OK) {
+                            var fileId = value[0].id; // Get the selected file ID
+                            var fileName = value[0].fileName; // Get the selected file name
+                            console.log('Selected File ID:', fileId);
+                            console.log('Selected File Name:', fileName);
+                            alert('Selected File Name: ' + fileName);
+                        }
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>
+
